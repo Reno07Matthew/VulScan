@@ -1,6 +1,6 @@
 # VulScan 
 
-A powerful, multi-threaded Python-based vulnerability scanner designed for fast discovery and assessment.
+A multi-threaded Python-based vulnerability scanner designed for fast discovery and assessment.
 
 ##  Features
 
