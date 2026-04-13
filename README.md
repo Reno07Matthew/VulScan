@@ -18,6 +18,6 @@ A powerful, multi-threaded Python-based vulnerability scanner designed for fast 
 **This tool is for educational and authorized security testing purposes only.** 
 Unauthorized scanning of systems you do not own or have explicit permission to test is illegal and unethical. The author is not responsible for any misuse or damage caused by this tool.
 
-## 📄 License
+##  License
 
 This project is open-source. Feel free to use and modify it.
