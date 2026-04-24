@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VulScan | Advanced Vulnerability Scanner</title>
+    <meta name="description" content="Multi-threaded network vulnerability scanner with CVE lookup, Geo-IP mapping, and risk assessment.">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +14,7 @@
     <div class="background-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
     <div class="container">
@@ -21,14 +23,17 @@
                 <span class="shield-icon">🛡️</span>
                 <h1>VulScan</h1>
             </div>
-            <p class="subtitle">Multi-threaded network assessment & CVE discovery tool</p>
+            <p class="subtitle">Multi-threaded network assessment · CVE discovery · Geo-IP · Risk scoring</p>
         </header>
 
         <main>
-            <section class="search-section card">
+            <!-- Search Section -->
+            <section class="search-section card" id="search-section">
                 <div class="input-group">
-                    <input type="text" id="target" placeholder="Enter target IP or hostname (e.g., 127.0.0.1)" autofocus>
-                    <button id="scan-btn">Start Scan</button>
+                    <input type="text" id="target" placeholder="Enter target IP or hostname (e.g., scanme.nmap.org)" autofocus>
+                    <button id="scan-btn">
+                        <span class="btn-icon">⚡</span> Start Scan
+                    </button>
                 </div>
                 <div class="advanced-options">
                     <div class="option">
@@ -42,20 +47,71 @@
                 </div>
             </section>
 
+            <!-- Status / Progress -->
             <section id="status-area" class="hidden">
                 <div class="status-card card">
-                    <div class="loader"></div>
-                    <p id="status-text">Scanning target...</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <p id="status-text">Initializing scan...</p>
                 </div>
             </section>
 
+            <!-- Results Dashboard -->
             <section id="results-area" class="hidden">
                 <div class="results-header">
-                    <h2>Scan Results for <span id="display-target"></span></h2>
+                    <h2>Results: <span id="display-target"></span></h2>
                     <span id="target-ip" class="ip-badge"></span>
                 </div>
-                <div id="results-container">
-                    <!-- Results cards will be injected here -->
+
+                <!-- Tab Navigation -->
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="ports">🔌 Ports</button>
+                    <button class="tab-btn" data-tab="risk">📊 Risk</button>
+                    <button class="tab-btn" data-tab="cves">🐛 CVEs</button>
+                    <button class="tab-btn" data-tab="geo">🌍 Geo</button>
+                </nav>
+
+                <!-- Ports Panel -->
+                <div class="tab-panel active" id="panel-ports">
+                    <div id="ports-container"></div>
+                </div>
+
+                <!-- Risk Panel -->
+                <div class="tab-panel" id="panel-risk">
+                    <div class="risk-overview card">
+                        <div class="risk-gauge-wrap">
+                            <svg class="risk-gauge" viewBox="0 0 200 120" id="risk-gauge-svg">
+                                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round"/>
+                                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round" id="gauge-arc" stroke-dasharray="0 251.2"/>
+                                <defs>
+                                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#00e676"/>
+                                        <stop offset="50%" stop-color="#ffaa00"/>
+                                        <stop offset="100%" stop-color="#ff4d4d"/>
+                                    </linearGradient>
+                                </defs>
+                                <text x="100" y="90" text-anchor="middle" fill="#fff" font-size="28" font-weight="700" id="gauge-score">0.0</text>
+                                <text x="100" y="110" text-anchor="middle" fill="#a0a0a0" font-size="12" id="gauge-label">OVERALL RISK</text>
+                            </svg>
+                        </div>
+                        <div class="risk-summary" id="risk-summary-text"></div>
+                    </div>
+                    <div id="risk-details-container"></div>
+                </div>
+
+                <!-- CVEs Panel -->
+                <div class="tab-panel" id="panel-cves">
+                    <div id="cves-container"></div>
+                </div>
+
+                <!-- Geo Panel -->
+                <div class="tab-panel" id="panel-geo">
+                    <div id="geo-loading" class="card" style="text-align:center; padding:30px;">
+                        <div class="loader" style="margin:0 auto 15px;"></div>
+                        <p>Fetching Geo-IP data & running traceroute...</p>
+                    </div>
+                    <div id="geo-container" class="hidden"></div>
                 </div>
             </section>
         </main>
