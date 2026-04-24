@@ -14,11 +14,11 @@ A powerful, multi-threaded Python-based vulnerability scanner with a premium web
 - **JSON Output**: Save detailed scan results to a structured JSON file.
 - **Debug Mode**: Detailed error logging to troubleshoot connection issues.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **This tool is for educational and authorized security testing purposes only.**
 Unauthorized scanning of systems you do not own or have explicit permission to test is illegal and unethical. The author is not responsible for any misuse or damage caused by this tool.
 
-## 📄 License
+## License
 
 This project is open-source. Feel free to use and modify it.
