@@ -198,6 +198,78 @@ def worker(target, port_queue, open_ports, timeout, debug):
         scan_port(target, port, open_ports, timeout, debug)
         port_queue.task_done()
 
+def run_scan(target, ports=None, threads=10, timeout=1.0, debug=False):
+    try:
+        target_ip = socket.gethostbyname(target)
+    except socket.gaierror as e:
+        if debug:
+            print(f"[DEBUG] {e}")
+        return {"error": f"Could not resolve host: {target}"}
+
+    port_list = TOP_PORTS
+    if ports:
+        if ports.lower() == 'all':
+            port_list = range(1, 65536)
+        else:
+            try:
+                port_list = [int(p.strip()) for p in ports.split(",")]
+            except ValueError:
+                return {"error": "Invalid port list format"}
+
+    open_ports = []
+    port_queue = Queue()
+
+    for p in port_list:
+        port_queue.put(p)
+
+    threads_list = []
+    for _ in range(threads):
+        thread = threading.Thread(target=worker, args=(target_ip, port_queue, open_ports, timeout, debug))
+        threads_list.append(thread)
+        thread.start()
+
+    for thread in threads_list:
+        thread.join()
+
+    open_ports.sort()
+    
+    scan_report = {
+        "target": target,
+        "target_ip": target_ip,
+        "open_ports": {}
+    }
+
+    if not open_ports:
+        return scan_report
+
+    for port in open_ports:
+        service_name = get_service_name(port)
+        weakness = analyze_weakness(port)
+        banner = grab_banner(target_ip, port, timeout=timeout, debug=debug)
+        
+        sw_software = None
+        sw_version = None
+        cves_found = []
+
+        if banner:
+            sw_info = extract_software_info(banner)
+            if sw_info['software'] and sw_info['version']:
+                sw_software = sw_info['software']
+                sw_version = sw_info['version']
+                cves_found = lookup_cves(sw_software, sw_version, sw_info.get('cpe_hint'), debug=debug)
+                time.sleep(1) # Gentle to NVD
+
+        scan_report["open_ports"][port] = {
+            "mapped_service": service_name,
+            "weakness_warning": weakness,
+            "banner": banner,
+            "identified_software": sw_software,
+            "identified_version": sw_version,
+            "vulnerabilities": cves_found
+        }
+
+    return scan_report
+
 def main():
     parser = argparse.ArgumentParser(description="Python Vulnerability Scanner (Port Scan, Banner Grab, CVEs)")
     parser.add_argument("target", help="Target IP address or hostname to scan")
@@ -208,133 +280,39 @@ def main():
     parser.add_argument("--debug", action="store_true", help="Enable debug output for exceptions")
     args = parser.parse_args()
 
-    target = args.target
+    print(f"[*] Starting scan on {args.target}")
+    result = run_scan(args.target, args.ports, args.threads, args.timeout, args.debug)
     
-    try:
-        target_ip = socket.gethostbyname(target)
-    except socket.gaierror as e:
-        print(f"[!] Complete failure resolving hostname: {target}")
-        if args.debug:
-            print(f"[DEBUG] {e}")
+    if "error" in result:
+        print(f"[!] {result['error']}")
         return
 
-    print(f"[*] Starting scan on {target} ({target_ip})")
-    print(f"[*] Threads: {args.threads}")
-
-    port_list = TOP_PORTS
-    if args.ports:
-        if args.ports.lower() == 'all':
-            port_list = range(1, 65536)
-        else:
-            try:
-                port_list = [int(p.strip()) for p in args.ports.split(",")]
-            except ValueError:
-                print("[!] Invalid port list format.")
-                return
-
-    open_ports = []
-    port_queue = Queue()
-
-    for p in port_list:
-        port_queue.put(p)
-
-    threads_list = []
-    for _ in range(args.threads):
-        thread = threading.Thread(target=worker, args=(target_ip, port_queue, open_ports, args.timeout, args.debug))
-        threads_list.append(thread)
-        thread.start()
-
-    for thread in threads_list:
-        thread.join()
-
-    open_ports.sort()
-    
     print("\n" + "="*50)
     print("SCAN RESULTS")
     print("="*50)
-    
-    if not open_ports:
-        print("No open ports found.")
-        return
 
-    scan_report = {
-        "target": target,
-        "target_ip": target_ip,
-        "open_ports": {}
-    }
-
-    for port in open_ports:
+    for port, data in result["open_ports"].items():
         print(f"\n[PORT {port}]")
+        print(f"  [*] Detected Service via IANA: {data['mapped_service'].upper()}")
+        if data['weakness_warning']:
+            print(f"  [!] WARNING Weak Service: {data['weakness_warning']}")
         
-        # New Feature: Service Mapping
-        service_name = get_service_name(port)
-        print(f"  [*] Detected Service via IANA: {service_name.upper()}")
-        
-        # 1. Weak service check
-        weakness = analyze_weakness(port)
-        if weakness:
-            print(f"  [!] WARNING Weak Service: {weakness}")
-        else:
-            print(f"  [-] Service protocol considered standard.")
-            
-        # 2. Banner Grabbing
-        print(f"  [*] Grabbing banner...")
-        banner = grab_banner(target_ip, port, timeout=args.timeout, debug=args.debug)
-        
-        sw_software = None
-        sw_version = None
-        cves_found = []
-
-        if banner:
-            display_banner = banner.replace('\\r\\n', ' ').replace('\\n', ' ').replace('\\r', '')
-            if len(display_banner) > 80:
-                display_banner = display_banner[:77] + "..."
-            print(f"  [+] Banner: {display_banner}")
-            
-            # 3. Detect software/version
-            sw_info = extract_software_info(banner)
-            if sw_info['software'] and sw_info['version']:
-                sw_software = sw_info['software']
-                sw_version = sw_info['version']
-                print(f"  [+] Identified Software: {sw_software} | Version: {sw_version}")
-                
-                # 4. CVE Lookup (improved with CPE hints)
-                cves_found = lookup_cves(sw_software, sw_version, sw_info.get('cpe_hint'), debug=args.debug)
-                if cves_found:
-                    print(f"  [!] Found {len(cves_found)} recent vulnerabilities:")
-                    for cve in cves_found:
+        if data['banner']:
+            print(f"  [+] Banner: {data['banner'][:77]}...")
+            if data['identified_software']:
+                print(f"  [+] Identified Software: {data['identified_software']} | Version: {data['identified_version']}")
+                if data['vulnerabilities']:
+                    print(f"  [!] Found {len(data['vulnerabilities'])} vulnerabilities:")
+                    for cve in data['vulnerabilities']:
                         print(f"      - {cve['id']} (CVSS: {cve['score']}): {cve['description']}")
-                else:
-                    print(f"  [-] No specific CVEs found (or API limit reached).")
-                
-                # Be gentle to NVD API
-                time.sleep(1)
-            else:
-                print("  [-] Could not confidently identify software/version from banner.")
-        else:
-            print("  [-] No banner received.")
-
-        # Save port findings to report
-        scan_report["open_ports"][port] = {
-            "mapped_service": service_name,
-            "weakness_warning": weakness,
-            "banner": banner,
-            "identified_software": sw_software,
-            "identified_version": sw_version,
-            "vulnerabilities": cves_found
-        }
 
     print("\n[*] Scan complete.")
 
     if args.output:
-        try:
-            with open(args.output, "w") as f:
-                json.dump(scan_report, f, indent=4)
-            print(f"[*] Detailed JSON report saved to: {args.output}")
-        except Exception as e:
-            print(f"[!] Warning: Failed to save JSON report to {args.output}")
-            if args.debug:
-                print(f"[DEBUG] JSON save error: {e}")
+        with open(args.output, "w") as f:
+            json.dump(result, f, indent=4)
+        print(f"[*] Detailed JSON report saved to: {args.output}")
 
 if __name__ == "__main__":
     main()
+

@@ -1,0 +1,326 @@
+:root {
+    --bg-color: #050505;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --accent-color: #00f2ff;
+    --accent-glow: rgba(0, 242, 255, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --danger: #ff4d4d;
+    --warning: #ffaa00;
+    --success: #00e676;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.background-blobs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: var(--accent-glow);
+    filter: blur(100px);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.blob-1 { top: -100px; left: -100px; }
+.blob-2 { bottom: -100px; right: -100px; background: rgba(123, 0, 255, 0.2); }
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.shield-icon {
+    font-size: 2.5rem;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff, var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.search-section {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+input[type="text"], input[type="number"] {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 15px 20px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    flex-grow: 1;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+button {
+    background: var(--accent-color);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 0 30px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px var(--accent-glow);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.advanced-options {
+    display: flex;
+    gap: 30px;
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.option input {
+    width: 150px;
+}
+
+#status-area {
+    margin-bottom: 30px;
+}
+
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.loader {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none;
+}
+
+.results-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.ip-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent-color);
+}
+
+#results-container {
+    display: grid;
+    gap: 20px;
+}
+
+.result-card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.port-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.port-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.service-badge {
+    background: var(--accent-glow);
+    color: var(--accent-color);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.banner-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    word-break: break-all;
+    margin-bottom: 15px;
+}
+
+.weakness-alert {
+    background: rgba(255, 77, 77, 0.1);
+    border-left: 4px solid var(--danger);
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.vulnerabilities {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cve-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 77, 77, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.cve-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.cve-id {
+    font-weight: 700;
+    color: var(--danger);
+}
+
+.cve-score {
+    background: var(--danger);
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.cve-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+footer {
+    text-align: center;
+    margin-top: 50px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}

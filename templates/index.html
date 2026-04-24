@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulScan | Advanced Vulnerability Scanner</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="shield-icon">🛡️</span>
+                <h1>VulScan</h1>
+            </div>
+            <p class="subtitle">Multi-threaded network assessment & CVE discovery tool</p>
+        </header>
+
+        <main>
+            <section class="search-section card">
+                <div class="input-group">
+                    <input type="text" id="target" placeholder="Enter target IP or hostname (e.g., 127.0.0.1)" autofocus>
+                    <button id="scan-btn">Start Scan</button>
+                </div>
+                <div class="advanced-options">
+                    <div class="option">
+                        <label for="ports">Ports</label>
+                        <input type="text" id="ports" placeholder="Top ports (default)" title="e.g., 22,80,443 or 'all'">
+                    </div>
+                    <div class="option">
+                        <label for="threads">Threads</label>
+                        <input type="number" id="threads" value="10" min="1" max="50">
+                    </div>
+                </div>
+            </section>
+
+            <section id="status-area" class="hidden">
+                <div class="status-card card">
+                    <div class="loader"></div>
+                    <p id="status-text">Scanning target...</p>
+                </div>
+            </section>
+
+            <section id="results-area" class="hidden">
+                <div class="results-header">
+                    <h2>Scan Results for <span id="display-target"></span></h2>
+                    <span id="target-ip" class="ip-badge"></span>
+                </div>
+                <div id="results-container">
+                    <!-- Results cards will be injected here -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 VulScan Security. For authorized testing only.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
